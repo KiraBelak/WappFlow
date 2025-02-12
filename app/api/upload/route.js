@@ -33,12 +33,12 @@ export async function POST(req) {
     
     // 3. Convertir a texto
     const text = await file.text();
-    console.log("text", text)
+    // console.log("text", text)
     // 4. Procesar el contenido del archivo
     const lines = text.split('\n');
     const messages = [];
     const participants = new Set();
-    console.log("lines", lines)
+    // console.log("lines", lines)
     
     // Expresión regular actualizada para manejar más casos
     const messageRegex = /^\s*‎?\[(\d{1,2}\/\d{1,2}\/\d{2}),\s*(\d{1,2}:\d{2}:\d{2})(?:\s*[ap]\.m\.)?\]\s+([^:]+):\s*(.+?)\r?$/i;
@@ -46,7 +46,7 @@ export async function POST(req) {
     for (const line of lines) {
       const match = line.trim().match(messageRegex);
       if (match) {
-        console.log("match", match);
+        // console.log("match", match);
         const [, date, time, sender, content] = match;
         
         // Convertir la fecha y hora al formato ISO
