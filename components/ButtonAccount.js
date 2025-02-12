@@ -5,13 +5,8 @@ import { useState } from "react";
 import { Popover, Transition } from "@headlessui/react";
 import { useSession, signOut, signIn } from "next-auth/react";
 import apiClient from "@/libs/api";
-
-// A button to show user some account actions
-//  1. Billing: open a Stripe Customer Portal to manage their billing (cancel subscription, update payment method, etc.).
-//     You have to manually activate the Customer Portal in your Stripe Dashboard (https://dashboard.stripe.com/test/settings/billing/portal)
-//     This is only available if the customer has a customerId (they made a purchase previously)
-//  2. Logout: sign out and go back to homepage
-// See more at https://shipfa.st/docs/components/buttonAccount
+import { HomeIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
 const ButtonAccount = () => {
   const { data: session, status } = useSession();
   const [isLoading, setIsLoading] = useState(false);
@@ -66,6 +61,14 @@ const ButtonAccount = () => {
     </button>
     );
 
+    const menuItems = [
+      {
+        label: "Dashboard",
+        href: "/dashboard",
+        icon: HomeIcon,
+      },
+    ];
+
   return (
     <Popover className="relative z-10">
       {({ open }) => (
@@ -119,6 +122,12 @@ const ButtonAccount = () => {
             <Popover.Panel className="absolute left-0 z-10 mt-3 w-screen max-w-[16rem] transform">
               <div className="overflow-hidden rounded-xl shadow-xl ring-1 ring-base-content ring-opacity-5 bg-base-100 p-1">
                 <div className="space-y-0.5 text-sm">
+                  {menuItems.map((item) => (
+                    <Link href={item.href} key={item.label} className="flex items-center gap-2 hover:bg-base-300 duration-200 py-1.5 px-4 w-full rounded-lg font-medium">
+                      <item.icon className="w-5 h-5" />
+                      {item.label}
+                    </Link>
+                  ))}
                   <button
                     className="flex items-center gap-2 hover:bg-base-300 duration-200 py-1.5 px-4 w-full rounded-lg font-medium"
                     onClick={handleBilling}
