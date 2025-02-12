@@ -1,5 +1,5 @@
 import ButtonAccount from "@/components/ButtonAccount";
-
+import Link from "next/link";
 export const dynamic = "force-dynamic";
 
 // This is a private page: It's protected by the layout.js component which ensures the user is authenticated.
@@ -11,6 +11,7 @@ export default async function Dashboard() {
       <section className="max-w-xl mx-auto space-y-8">
         <ButtonAccount />
         <h1 className="text-3xl md:text-4xl font-extrabold">Private Page</h1>
+        <Link href="/dashboard/upload">Subir archivo</Link>
       </section>
     </main>
   );
