@@ -5,24 +5,24 @@ import { StarIcon } from '@heroicons/react/24/solid';
 
 const testimonials = [
   {
-    quote: "WappFlow me ayudó a entender mejor la dinámica de comunicación en mi equipo de trabajo. La interfaz es intuitiva y los resultados son muy valiosos.",
-    author: "María González",
-    role: "Project Manager",
-    image: "https://randomuser.me/api/portraits/women/1.jpg",
+    quote: "WappFlow me ayudó a descubrir patrones en mi comunicación con mi pareja que no había notado antes. Ahora entendemos mejor nuestros horarios y momentos de conexión.",
+    author: "Laura Sánchez",
+    role: "Usuaria Personal",
+    image: "https://randomuser.me/api/portraits/women/3.jpg",
     rating: 5
   },
   {
-    quote: "Una herramienta increíble para analizar la efectividad de la comunicación en grupos. Ha transformado la forma en que gestionamos nuestros chats.",
-    author: "Carlos Ruiz", 
-    role: "Team Lead",
-    image: "https://randomuser.me/api/portraits/men/1.jpg",
+    quote: "Gracias a los análisis, identificamos que teníamos más desacuerdos los lunes por el estrés laboral. Ajustamos nuestra forma de comunicarnos y mejoró mucho la relación.",
+    author: "Daniel Torres",
+    role: "Usuario Personal", 
+    image: "https://randomuser.me/api/portraits/men/4.jpg",
     rating: 5
   },
   {
-    quote: "Los insights que obtuve me ayudaron a mejorar significativamente nuestra comunicación. Ahora podemos tomar decisiones basadas en datos reales.",
-    author: "Ana Martínez",
-    role: "Community Manager",
-    image: "https://randomuser.me/api/portraits/women/2.jpg",
+    quote: "Los insights sobre nuestros temas de conversación más frecuentes nos ayudaron a balancear mejor nuestras charlas. Una herramienta que fortalece relaciones.",
+    author: "Elena Ramírez",
+    role: "Usuaria Personal",
+    image: "https://randomuser.me/api/portraits/women/5.jpg",
     rating: 5
   }
 ];
