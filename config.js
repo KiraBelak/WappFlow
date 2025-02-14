@@ -2,97 +2,111 @@ import themes from "daisyui/src/theming/themes";
 
 const config = {
   // REQUIRED
-  appName: "ShipeaRapido",
-  // REQUIRED: a short description of your app for SEO tags (can be overwritten)
+  appName: "WappFlow",
+  // REQUIRED: una descripción breve para SEO (puede sobreescribirse en cada página)
   appDescription:
-    "The NextJS boilerplate with all you need to build your SaaS, AI tool, or any other web app.",
-  // REQUIRED (no https://, not trialing slash at the end, just the naked domain)
-  domainName: "shipfa.st",
+    "Analiza tus conversaciones de WhatsApp y obtén insights valiosos con WappFlow.",
+  // REQUIRED (sin https://, sin barra final)
+  domainName: "wappflow.com",
+
   crisp: {
-    // Crisp website ID. IF YOU DON'T USE CRISP: just remove this => Then add a support email in this config file (mailgun.supportEmail) otherwise customer support won't work.
+    // ID de Crisp (si no lo usas, elimina esta sección y usa mailgun.supportEmail)
     id: "",
-    // Hide Crisp by default, except on route "/". Crisp is toggled with <ButtonSupport/>. If you want to show Crisp on every routes, just remove this below
+    // Si solo quieres mostrar Crisp en la ruta "/", deja esta propiedad. De lo contrario, elimínala para mostrar Crisp en todas partes.
     onlyShowOnRoutes: ["/"],
   },
+
   stripe: {
-    // Create multiple plans in your Stripe dashboard, then add them here. You can add as many plans as you want, just make sure to add the priceId
+    // Planes configurados en tu dashboard de Stripe
     plans: [
       {
-        // REQUIRED — we use this to find the plan in the webhook (for instance if you want to update the user's credits based on the plan)
+        // Plan básico (Manantial)
         priceId:
           process.env.NODE_ENV === "development"
-            ? "price_1Niyy5AxyNprDp7iZIqEyD2h"
-            : "price_456",
-        //  REQUIRED - Name of the plan, displayed on the pricing page
-        name: "Starter",
-        // A friendly description of the plan, displayed on the pricing page. Tip: explain why this plan and not others
-        description: "Perfect for small projects",
-        // The price you want to display, the one user will be charged on Stripe.
-        price: 79,
-        // If you have an anchor price (i.e. $29) that you want to display crossed out, put it here. Otherwise, leave it empty
-        priceAnchor: 99,
+            ? "price_DEV_MANANTIAL"
+            : "price_PROD_MANANTIAL",
+        name: "Manantial",
+        description: "Empieza a fluir con el análisis básico de WhatsApp.",
+        price: 0, // Ejemplo: gratis o 9 USD/mes
+        priceAnchor: 9, // Muestra un precio tachado o vacío si no lo usas
         features: [
-          {
-            name: "NextJS boilerplate",
-          },
-          { name: "User oauth" },
-          { name: "Database" },
-          { name: "Emails" },
+          { name: "Análisis de 1 conversación" },
+          { name: "Estadísticas básicas" },
+          { name: "Exportación en PDF" },
         ],
       },
       {
-        // This plan will look different on the pricing page, it will be highlighted. You can only have one plan with isFeatured: true
+        // Plan destacado (Corriente)
         isFeatured: true,
         priceId:
           process.env.NODE_ENV === "development"
-            ? "price_1O5KtcAxyNprDp7iftKnrrpw"
-            : "price_456",
-        name: "Advanced",
-        description: "You need more power",
-        price: 99,
-        priceAnchor: 149,
+            ? "price_DEV_CORRIENTE"
+            : "price_PROD_CORRIENTE",
+        name: "Corriente",
+        description: "Un flujo más amplio de análisis para proyectos en crecimiento.",
+        price: 49,
+        priceAnchor: 79,
         features: [
-          {
-            name: "NextJS boilerplate",
-          },
-          { name: "User oauth" },
-          { name: "Database" },
-          { name: "Emails" },
-          { name: "1 year of updates" },
-          { name: "24/7 support" },
+          { name: "Análisis de múltiples conversaciones" },
+          { name: "Estadísticas avanzadas (tiempo de respuesta, actividad)" },
+          { name: "Exportación en múltiples formatos" },
+          { name: "Panel en tiempo real" },
+          { name: "Soporte prioritario" },
+        ],
+      },
+      {
+        // Plan completo (Marea)
+        priceId:
+          process.env.NODE_ENV === "development"
+            ? "price_DEV_MAREA"
+            : "price_PROD_MAREA",
+        name: "Marea",
+        description:
+          "El paquete completo para empresas con grandes necesidades de análisis.",
+        price: 199,
+        priceAnchor: 249,
+        features: [
+          { name: "Análisis ilimitado de conversaciones" },
+          { name: "API de integración (CRM, Slack, etc.)" },
+          { name: "Personalización de reportes (marca blanca)" },
+          { name: "Soporte 24/7" },
+          { name: "Funciones avanzadas de NLP" },
         ],
       },
     ],
   },
+
   aws: {
-    // If you use AWS S3/Cloudfront, put values in here
-    bucket: "bucket-name",
-    bucketUrl: `https://bucket-name.s3.amazonaws.com/`,
-    cdn: "https://cdn-id.cloudfront.net/",
+    // Configuración de S3/CloudFront (si lo usas)
+    bucket: "wappflow-bucket",
+    bucketUrl: "https://wappflow-bucket.s3.amazonaws.com/",
+    cdn: "https://cdn-wappflow.cloudfront.net/",
   },
+
   mailgun: {
-    // subdomain to use when sending emails, if you don't have a subdomain, just remove it. Highly recommended to have one (i.e. mg.yourdomain.com or mail.yourdomain.com)
+    // Subdominio para Mailgun (opcional)
     subdomain: "",
-    // REQUIRED — Email 'From' field to be used when sending magic login links
-    fromNoReply: `ShipeaRapido <noreply@magiobus.com>`,
-    // REQUIRED — Email 'From' field to be used when sending other emails, like abandoned carts, updates etc..
-    fromAdmin: `Magio at shipearapido <magio@magiobus.com>`,
-    // Email shown to customer if need support. Leave empty if not needed => if empty, set up Crisp above, otherwise you won't be able to offer customer support."
-    supportEmail: "magio@magiobus.com",
-    // When someone replies to supportEmail sent by the app, forward it to the email below (otherwise it's lost). If you set supportEmail to empty, this will be ignored.
-    forwardRepliesTo: "magio@magiobus.com",
+    // Email “From” para el envío de magic login links
+    fromNoReply: `WappFlow <noreply@wappflow.com>`,
+    // Email “From” para otras notificaciones
+    fromAdmin: `WappFlow Team <admin@wappflow.com>`,
+    // Email de soporte (si no usas Crisp, se mostrará para contacto directo)
+    supportEmail: "support@wappflow.com",
+    // Dirección a la que se redirigen las respuestas de los usuarios (opcional)
+    forwardRepliesTo: "support@wappflow.com",
   },
+
   colors: {
-    // REQUIRED — The DaisyUI theme to use (added to the main layout.js). Leave blank for default (light & dark mode). If you any other theme than light/dark, you need to add it in config.tailwind.js in daisyui.themes.
+    // Tema de DaisyUI (asegúrate de que "light" exista en tu config.tailwind.js)
     theme: "light",
-    // REQUIRED — This color will be reflected on the whole app outside of the document (loading bar, Chrome tabs, etc..). By default it takes the primary color from your DaisyUI theme (make sure to update your the theme name after "data-theme=")
-    // OR you can just do this to use a custom color: main: "#f37055". HEX only.
+    // Color principal para la app (por defecto toma el primary del tema "light")
     main: themes["light"]["primary"],
   },
+
   auth: {
-    // REQUIRED — the path to log in users. It's use to protect private routes (like /dashboard). It's used in apiClient (/libs/api.js) upon 401 errors from our API
+    // Ruta para iniciar sesión (NextAuth u otra config)
     loginUrl: "/api/auth/signin",
-    // REQUIRED — the path you want to redirect users after successfull login (i.e. /dashboard, /private). This is normally a private page for users to manage their accounts. It's used in apiClient (/libs/api.js) upon 401 errors from our API & in ButtonSignin.js
+    // Ruta de callback tras login exitoso (por ejemplo, tu dashboard)
     callbackUrl: "/dashboard",
   },
 };
