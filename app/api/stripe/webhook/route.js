@@ -7,6 +7,10 @@ import User from "@/models/User";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
+// Configure the route handler to not parse the raw body
+// export const dynamic = 'force-dynamic';
+// export const runtime = 'edge';
+
 export async function POST(req) {
   try {
     const body = await req.text();
@@ -100,10 +104,3 @@ export async function POST(req) {
     );
   }
 }
-
-// Stripe requires the raw body to construct the event
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-}; 
