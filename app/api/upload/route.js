@@ -4,12 +4,15 @@ import { authOptions } from '@/libs/next-auth';
 import Message from '@/models/Message';
 import connectDB from '@/libs/mongoose';
 
+// hacer que el endpoint dure un minuto para que vercel no lo cierre
+export const maxDuration = 60;
+
 export async function POST(req) {
   try {
     // Conectar a la base de datos
     await connectDB();
 
-    // Obtener la sesión del usuario
+    // Obtener la sesión del usuaario
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json(
