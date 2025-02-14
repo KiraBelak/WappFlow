@@ -2,51 +2,52 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/libs/next-auth";
 import connectMongo from "@/libs/mongoose";
-import { createCustomerPortal } from "@/libs/stripe";
 import User from "@/models/User";
+import Stripe from "stripe";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export async function POST(req) {
-  const session = await getServerSession(authOptions);
+  try {
+    const session = await getServerSession(authOptions);
 
-  if (session) {
-    try {
-      await connectMongo();
-
-      const body = await req.json();
-
-      const { id } = session.user;
-
-      const user = await User.findById(id);
-
-      if (!user?.customerId) {
-        return NextResponse.json(
-          {
-            error:
-              "You don't have a billing account yet. Make a purchase first.",
-          },
-          { status: 400 }
-        );
-      } else if (!body.returnUrl) {
-        return NextResponse.json(
-          { error: "Return URL is required" },
-          { status: 400 }
-        );
-      }
-
-      const stripePortalUrl = await createCustomerPortal({
-        customerId: user.customerId,
-        returnUrl: body.returnUrl,
-      });
-
-      return NextResponse.json({
-        url: stripePortalUrl,
-      });
-    } catch (e) {
-      console.error(e);
-      return NextResponse.json({ error: e?.message }, { status: 500 });
+    if (!session) {
+      return NextResponse.json(
+        { error: "No autorizado" },
+        { status: 401 }
+      );
     }
-  } else {
-    // Not Signed in
-    return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+
+    await connectMongo();
+    const user = await User.findById(session.user.id);
+
+    if (!user?.stripeCustomerId) {
+      return NextResponse.json(
+        { error: "No tienes una cuenta de facturación. Realiza una suscripción primero." },
+        { status: 400 }
+      );
+    }
+
+    const body = await req.json();
+    if (!body.returnUrl) {
+      return NextResponse.json(
+        { error: "URL de retorno requerida" },
+        { status: 400 }
+      );
+    }
+
+    // Crear la sesión del portal de Stripe
+    const portalSession = await stripe.billingPortal.sessions.create({
+      customer: user.stripeCustomerId,
+      return_url: body.returnUrl,
+    });
+
+    return NextResponse.json({ url: portalSession.url });
+  } catch (error) {
+    console.error('Error al crear la sesión del portal:', error);
+    return NextResponse.json(
+      { error: "Error al crear la sesión del portal" },
+      { status: 500 }
+    );
   }
 }
