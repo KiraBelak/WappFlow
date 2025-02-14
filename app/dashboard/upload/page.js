@@ -1,7 +1,10 @@
 'use client';
 
-import { useRef, FormEvent, useState } from 'react';
+import { useRef, FormEvent, useState, useEffect } from 'react';
 import { ArrowUpTrayIcon } from '@heroicons/react/24/outline';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import toast from 'react-hot-toast';
 
 export default function UploadPage() {
   const fileInputRef = useRef(null);
@@ -9,9 +12,43 @@ export default function UploadPage() {
   const [isDragging, setIsDragging] = useState(false);
   const [fileName, setFileName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [canUpload, setCanUpload] = useState(false);
+  const [isChecking, setIsChecking] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    const checkLimits = async () => {
+      try {
+        const response = await fetch('/api/user/limits');
+        const data = await response.json();
+        
+        if (data.error) {
+          toast.error(data.error);
+          return;
+        }
+
+        setCanUpload(data.canUpload);
+        if (!data.canUpload) {
+          setStatus(`Has alcanzado el límite de ${data.limit} conversaciones de tu plan.`);
+        }
+      } catch (error) {
+        console.error('Error al verificar límites:', error);
+        toast.error('Error al verificar límites de conversaciones');
+      } finally {
+        setIsChecking(false);
+      }
+    };
+
+    checkLimits();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!canUpload) {
+      router.push('/#pricing');
+      return;
+    }
+
     setStatus(null);
     setIsLoading(true);
     
@@ -38,8 +75,13 @@ export default function UploadPage() {
       }
 
       const data = await res.json();
-      setStatus(`¡Archivo subido con éxito!`);
-      setFileName('');
+      toast.success('¡Archivo subido con éxito!');
+      
+      // Forzar revalidación y redirección
+      router.refresh();
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 500); // Pequeño delay para asegurar que la revalidación se complete
 
     } catch (error) {
       console.error('Error al subir archivo', error);
@@ -51,7 +93,9 @@ export default function UploadPage() {
 
   const handleDragOver = (e) => {
     e.preventDefault();
-    setIsDragging(true);
+    if (canUpload) {
+      setIsDragging(true);
+    }
   };
 
   const handleDragLeave = () => {
@@ -62,22 +106,55 @@ export default function UploadPage() {
     e.preventDefault();
     setIsDragging(false);
     
+    if (!canUpload) return;
+
     const file = e.dataTransfer.files[0];
     if (file && file.type === 'text/plain') {
       fileInputRef.current.files = e.dataTransfer.files;
       setFileName(file.name);
+      setStatus(null);
     } else {
       setStatus('Por favor, sube solo archivos .txt');
     }
   };
 
   const handleFileChange = (e) => {
+    if (!canUpload) return;
+
     const file = e.target.files[0];
     if (file) {
       setFileName(file.name);
       setStatus(null);
     }
   };
+
+  if (isChecking) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center p-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#25D366]"></div>
+        <p className="mt-4 text-gray-600">Verificando límites...</p>
+      </div>
+    );
+  }
+
+  if (!canUpload) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center p-4 text-center">
+        <h1 className="text-3xl font-bold mb-4 text-gray-800">
+          Límite de conversaciones alcanzado
+        </h1>
+        <p className="text-gray-600 mb-8">
+          Has alcanzado el límite de conversaciones de tu plan actual.
+        </p>
+        <Link
+          href="/#pricing"
+          className="bg-[#25D366] text-white px-6 py-3 rounded-lg hover:bg-[#128C7E] transition-colors"
+        >
+          Mejorar Plan
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-gray-50">
