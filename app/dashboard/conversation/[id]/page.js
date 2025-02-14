@@ -191,195 +191,325 @@ export default async function ConversationPage({ params }) {
   const stats = calculateStats(conversation.messages);
 
   return (
-    <main className="min-h-screen p-8 pb-24 bg-gray-50">
-      <section className="max-w-6xl mx-auto space-y-8">
-        <div className="flex items-center gap-4">
-          <Link href="/dashboard" className="text-blue-600 hover:text-blue-700">
-            ← Volver
-          </Link>
-          <h1 className="text-3xl font-bold text-gray-900">{conversation.title}</h1>
-        </div>
-
-        {/* Resumen General */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold mb-2">Mensajes Totales</h3>
-            <p className="text-3xl font-bold text-blue-600">{stats.totalMessages}</p>
-          </div>
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold mb-2">Participantes</h3>
-            <p className="text-3xl font-bold text-blue-600">{conversation.participants.length}</p>
-          </div>
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold mb-2">Duración Total</h3>
-            <p className="text-3xl font-bold text-blue-600">
-              {formatDuration(stats.lastMessage - stats.firstMessage)}
-            </p>
-          </div>
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold mb-2">Contenido Multimedia</h3>
-            <p className="text-3xl font-bold text-blue-600">{stats.mediaMessages.total}</p>
-          </div>
-        </div>
-
-        {/* Estadísticas por Participante */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-xl font-semibold mb-6">Estadísticas por Participante</h3>
-          <div className="space-y-8">
-            {Object.entries(stats.messagesByParticipant)
-              .sort(([,a], [,b]) => b - a)
-              .map(([participant, count]) => (
-                <div key={participant} className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium text-lg">{participant}</span>
-                    <span className="text-gray-500">
-                      {count} mensajes ({Math.round(stats.participationRate[participant])}%)
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                    <div>
-                      <span className="text-gray-500">Promedio de palabras:</span>
-                      <br />
-                      <span className="font-medium">
-                        {Math.round(stats.averageWordsByParticipant[participant])} palabras/mensaje
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">Tiempo promedio de respuesta:</span>
-                      <br />
-                      <span className="font-medium">
-                        {formatDuration(stats.responseTimeByParticipant[participant] || 0)}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">Mensajes multimedia:</span>
-                      <br />
-                      <span className="font-medium">
-                        {stats.mediaMessages.byParticipant[participant] || 0} archivos
-                      </span>
-                    </div>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className="bg-blue-600 h-2 rounded-full"
-                      style={{
-                        width: `${(count / stats.totalMessages) * 100}%`
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Actividad por Hora */}
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-xl font-semibold mb-4">Actividad por Hora</h3>
-            <div className="grid grid-cols-24 gap-1 h-40">
-              {stats.messagesByHour.map((count, hour) => {
-                const height = count ? (count / Math.max(...stats.messagesByHour)) * 100 : 0;
-                return (
-                  <div key={hour} className="flex flex-col items-center">
-                    <div className="flex-1 w-full relative">
-                      <div
-                        className="absolute bottom-0 w-full bg-blue-600 rounded-t"
-                        style={{ height: `${height}%` }}
-                      />
-                    </div>
-                    <span className="text-xs mt-1">{hour}h</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Actividad por Día */}
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-xl font-semibold mb-4">Actividad por Día</h3>
-            <div className="grid grid-cols-7 gap-1 h-40">
-              {stats.messagesByDay.map((count, day) => {
-                const height = count ? (count / Math.max(...stats.messagesByDay)) * 100 : 0;
-                return (
-                  <div key={day} className="flex flex-col items-center">
-                    <div className="flex-1 w-full relative">
-                      <div
-                        className="absolute bottom-0 w-full bg-blue-600 rounded-t"
-                        style={{ height: `${height}%` }}
-                      />
-                    </div>
-                    <span className="text-xs mt-1">{DAYS[day].slice(0, 3)}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* Palabras más Frecuentes y Mensajes Destacados */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-xl font-semibold mb-4">Palabras más Frecuentes</h3>
-            <div className="flex flex-wrap gap-2">
-              {stats.topWords.map(([word, count]) => (
-                <span
-                  key={word}
-                  className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm"
-                  style={{
-                    fontSize: `${Math.max(0.8, Math.min(1.5, count / (stats.totalMessages * 0.1)))}em`
-                  }}
+    <div className="min-h-screen bg-gray-50">
+      {/* Header con título y metadata */}
+      <header className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <div className="flex items-center gap-3 text-gray-500 mb-2">
+                <Link 
+                  href="/dashboard" 
+                  className="inline-flex items-center gap-2 text-sm hover:text-gray-900 transition-colors"
                 >
-                  {word} ({count})
-                </span>
-              ))}
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                  </svg>
+                  Volver al dashboard
+                </Link>
+                <span>•</span>
+                <time className="text-sm">
+                  {new Date(stats.firstMessage).toLocaleDateString()} - {new Date(stats.lastMessage).toLocaleDateString()}
+                </time>
+              </div>
+              <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">{conversation.title}</h1>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex -space-x-2">
+                {conversation.participants.slice(0, 3).map((participant, i) => (
+                  <div 
+                    key={participant}
+                    className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white text-sm font-medium ring-2 ring-white"
+                  >
+                    {participant[0].toUpperCase()}
+                  </div>
+                ))}
+                {conversation.participants.length > 3 && (
+                  <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-200 text-gray-600 text-sm font-medium ring-2 ring-white">
+                    +{conversation.participants.length - 3}
+                  </div>
+                )}
+              </div>
+              <span className="text-sm text-gray-500">
+                {conversation.participants.length} participantes
+              </span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="space-y-8">
+          {/* Tarjetas de resumen */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              {
+                title: "Mensajes Totales",
+                value: stats.totalMessages,
+                icon: (
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+                  </svg>
+                )
+              },
+              {
+                title: "Duración Total",
+                value: formatDuration(stats.lastMessage - stats.firstMessage),
+                icon: (
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                )
+              },
+              {
+                title: "Contenido Multimedia",
+                value: stats.mediaMessages.total,
+                icon: (
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                  </svg>
+                )
+              },
+              {
+                title: "Palabras Únicas",
+                value: stats.topWords.length,
+                icon: (
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                  </svg>
+                )
+              }
+            ].map((stat, i) => (
+              <div key={i} className="bg-white rounded-xl shadow-sm p-6">
+                <div className="flex items-center gap-4">
+                  <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+                    {stat.icon}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">{stat.title}</p>
+                    <p className="text-2xl font-semibold text-gray-900">{stat.value}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Gráficos de actividad */}
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Actividad por Hora */}
+            <div className="bg-white rounded-xl shadow-sm p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-gray-900">Actividad por Hora</h3>
+                <div className="text-sm text-gray-500">
+                  Hora más activa: {stats.messagesByHour.indexOf(Math.max(...stats.messagesByHour))}:00
+                </div>
+              </div>
+              <div className="relative">
+                <div className="grid grid-cols-24 gap-1 h-48 mb-6">
+                  {stats.messagesByHour.map((count, hour) => {
+                    const height = count ? (count / Math.max(...stats.messagesByHour)) * 100 : 0;
+                    return (
+                      <div key={hour} className="flex flex-col items-center group">
+                        <div className="flex-1 w-full relative">
+                          <div
+                            className="absolute bottom-0 w-full bg-gradient-to-t from-blue-600 to-blue-400 rounded-t transition-all duration-200 group-hover:from-blue-700 group-hover:to-blue-500"
+                            style={{ height: `${height}%` }}
+                          >
+                            <div className="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-2 py-1 rounded text-xs whitespace-nowrap z-10">
+                              {count} mensajes a las {hour}:00
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                {/* Eje X con horas */}
+                <div className="grid grid-cols-24 gap-1 mt-2">
+                  {stats.messagesByHour.map((_, hour) => (
+                    <div key={hour} className="flex justify-center">
+                      <span className="text-xs text-gray-500 -rotate-45 origin-top-left transform translate-x-3">
+                        {hour.toString().padStart(2, '0')}:00
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Actividad por Día */}
+            <div className="bg-white rounded-xl shadow-sm p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-6">Actividad por Día</h3>
+              <div className="grid grid-cols-7 gap-2 h-48">
+                {stats.messagesByDay.map((count, day) => {
+                  const height = count ? (count / Math.max(...stats.messagesByDay)) * 100 : 0;
+                  const maxCount = Math.max(...stats.messagesByDay);
+                  return (
+                    <div key={day} className="flex flex-col items-center group">
+                      <div className="flex-1 w-full relative">
+                        <div
+                          className="absolute bottom-0 w-full bg-gradient-to-t from-blue-600 to-blue-400 rounded-t transition-all duration-200 group-hover:from-blue-700 group-hover:to-blue-500"
+                          style={{ height: `${height}%` }}
+                        >
+                          <div className="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-2 py-1 rounded text-xs whitespace-nowrap">
+                            {count} mensajes
+                          </div>
+                        </div>
+                      </div>
+                      <div className="mt-2 text-center">
+                        <span className="text-xs font-medium text-gray-900">{DAYS[day].slice(0, 3)}</span>
+                        <span className="block text-xs text-gray-500">{Math.round((count/maxCount) * 100)}%</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-xl font-semibold mb-4">Mensajes Destacados</h3>
+          {/* Estadísticas por Participante */}
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-6">Estadísticas por Participante</h3>
+            <div className="space-y-8">
+              {Object.entries(stats.messagesByParticipant)
+                .sort(([,a], [,b]) => b - a)
+                .map(([participant, count]) => (
+                  <div key={participant} className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-medium">
+                          {participant[0].toUpperCase()}
+                        </div>
+                        <span className="font-medium text-gray-900">{participant}</span>
+                      </div>
+                      <span className="text-sm text-gray-500">
+                        {count} mensajes ({Math.round(stats.participationRate[participant])}%)
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {[
+                        {
+                          label: "Promedio de palabras",
+                          value: `${Math.round(stats.averageWordsByParticipant[participant])} palabras/mensaje`
+                        },
+                        {
+                          label: "Tiempo de respuesta",
+                          value: formatDuration(stats.responseTimeByParticipant[participant] || 0)
+                        },
+                        {
+                          label: "Contenido multimedia",
+                          value: `${stats.mediaMessages.byParticipant[participant] || 0} archivos`
+                        }
+                      ].map((stat, i) => (
+                        <div key={i} className="bg-gray-50 p-3 rounded-lg">
+                          <p className="text-sm text-gray-500">{stat.label}</p>
+                          <p className="text-sm font-medium text-gray-900">{stat.value}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="relative pt-1">
+                      <div className="overflow-hidden h-2 text-xs flex rounded bg-gray-100">
+                        <div
+                          className="bg-gradient-to-r from-blue-500 to-blue-600 rounded"
+                          style={{ width: `${(count / stats.totalMessages) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
+
+          {/* Palabras Frecuentes y Mensajes Destacados */}
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="bg-white rounded-xl shadow-sm p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-6">Palabras más Frecuentes</h3>
+              <div className="flex flex-wrap gap-2">
+                {stats.topWords.map(([word, count], index) => {
+                  const size = Math.max(0.8, Math.min(1.5, count / (stats.totalMessages * 0.1)));
+                  const opacity = 1 - (index / stats.topWords.length * 0.6);
+                  return (
+                    <span
+                      key={word}
+                      className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full"
+                      style={{
+                        fontSize: `${size}em`,
+                        opacity
+                      }}
+                    >
+                      {word} ({count})
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-sm p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-6">Mensajes Destacados</h3>
+              <div className="space-y-6">
+                {[
+                  {
+                    title: "Mensaje más largo",
+                    content: stats.longestMessage.content,
+                    sender: stats.longestMessage.sender,
+                    meta: `${stats.longestMessage.length} palabras`
+                  },
+                  {
+                    title: "Mensaje más corto",
+                    content: stats.shortestMessage.content,
+                    sender: stats.shortestMessage.sender,
+                    meta: `${stats.shortestMessage.length} palabras`
+                  }
+                ].map((message, i) => (
+                  <div key={i} className="space-y-2">
+                    <h4 className="font-medium text-gray-700">{message.title}</h4>
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <p className="text-gray-900">{message.content}</p>
+                      <div className="mt-2 flex items-center gap-2 text-sm text-gray-500">
+                        <span>{message.sender}</span>
+                        <span>•</span>
+                        <span>{message.meta}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Períodos de Inactividad */}
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-6">Períodos de Inactividad más Largos</h3>
             <div className="space-y-4">
-              <div>
-                <h4 className="font-medium text-gray-700 mb-2">Mensaje más largo</h4>
-                <div className="bg-gray-50 p-3 rounded">
-                  <p className="text-sm text-gray-600">{stats.longestMessage.content}</p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Por {stats.longestMessage.sender} ({stats.longestMessage.length} palabras)
-                  </p>
-                </div>
-              </div>
-              <div>
-                <h4 className="font-medium text-gray-700 mb-2">Mensaje más corto</h4>
-                <div className="bg-gray-50 p-3 rounded">
-                  <p className="text-sm text-gray-600">{stats.shortestMessage.content}</p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Por {stats.shortestMessage.sender} ({stats.shortestMessage.length} palabras)
-                  </p>
-                </div>
-              </div>
+              {stats.inactivityPeriods
+                .sort((a, b) => b.duration - a.duration)
+                .slice(0, 5)
+                .map((period, index) => (
+                  <div key={index} className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-4 bg-gray-50 rounded-lg">
+                    <div className="space-y-1">
+                      <div className="text-sm text-gray-500">Desde</div>
+                      <div className="font-medium">
+                        {new Date(period.start).toLocaleDateString()}{' '}
+                        {new Date(period.start).toLocaleTimeString()}
+                      </div>
+                    </div>
+                    <div className="hidden sm:block text-gray-300">→</div>
+                    <div className="space-y-1">
+                      <div className="text-sm text-gray-500">Hasta</div>
+                      <div className="font-medium">
+                        {new Date(period.end).toLocaleDateString()}{' '}
+                        {new Date(period.end).toLocaleTimeString()}
+                      </div>
+                    </div>
+                    <div className="mt-2 sm:mt-0 text-blue-600 font-medium">
+                      {formatDuration(period.duration)}
+                    </div>
+                  </div>
+                ))}
             </div>
           </div>
         </div>
-
-        {/* Períodos de Inactividad */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-xl font-semibold mb-4">Períodos de Inactividad más Largos</h3>
-          <div className="space-y-2">
-            {stats.inactivityPeriods
-              .sort((a, b) => b.duration - a.duration)
-              .slice(0, 5)
-              .map((period, index) => (
-                <div key={index} className="flex justify-between items-center text-sm">
-                  <span>
-                    {new Date(period.start).toLocaleDateString()} {new Date(period.start).toLocaleTimeString()}
-                    {' → '}
-                    {new Date(period.end).toLocaleDateString()} {new Date(period.end).toLocaleTimeString()}
-                  </span>
-                  <span className="font-medium">{formatDuration(period.duration)}</span>
-                </div>
-              ))}
-          </div>
-        </div>
-      </section>
-    </main>
+      </main>
+    </div>
   );
 } 
