@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Popover, Transition } from "@headlessui/react";
 import { useSession, signOut, signIn } from "next-auth/react";
 import apiClient from "@/libs/api";
-import { HomeIcon } from "@heroicons/react/24/outline";
+import { HomeIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 const ButtonAccount = () => {
   const { data: session, status } = useSession();
@@ -62,6 +62,11 @@ const ButtonAccount = () => {
     );
 
     const menuItems = [
+      {
+        label: "Inicio",
+        href: "/",
+        icon: ArrowLeftIcon,
+      },
       {
         label: "Dashboard",
         href: "/dashboard",
