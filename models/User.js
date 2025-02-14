@@ -13,6 +13,8 @@ const userSchema = mongoose.Schema(
       trim: true,
       lowercase: true,
       private: true,
+      unique: true,
+      required: true,
     },
     image: {
       type: String,
@@ -45,6 +47,27 @@ const userSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    // Campos de autenticación
+    emailVerified: Date,
+    password: String,
+    
+    // Campos de Stripe
+    stripeCustomerId: String,
+    subscriptionId: String,
+    subscriptionStatus: {
+      type: String,
+      enum: ['active', 'canceled', 'past_due', 'unpaid', null],
+      default: null
+    },
+    subscriptionPriceId: String,
+    subscriptionCurrentPeriodEnd: Date,
+
+    // Campos de la aplicación
+    conversations: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Conversation"
+    }],
+    lastLogin: Date,
   },
   {
     timestamps: true,
